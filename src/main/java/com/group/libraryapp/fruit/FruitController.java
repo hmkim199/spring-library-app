@@ -1,10 +1,9 @@
 package com.group.libraryapp.fruit;
 
-import com.group.libraryapp.fruit.dto.SalesAmountInfoResponse;
-import com.group.libraryapp.fruit.dto.SaveFruitInfoRequest;
-import com.group.libraryapp.fruit.dto.updateFruitStockRequest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.group.libraryapp.fruit.dto.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class FruitController {
@@ -16,7 +15,7 @@ public class FruitController {
     }
 
     @PostMapping("/api/v1/fruit")
-    public void saveFruitInfo(@RequestBody SaveFruitInfoRequest request) {
+    public void saveFruitInfo(@RequestBody FruitDefaultDto request) {
         fruitService.saveFruitInfo(request);
     }
 
@@ -33,4 +32,13 @@ public class FruitController {
         return new SalesAmountInfoResponse(salesAmount, notSalesAmount);
     }
 
+    @GetMapping("/api/v1/fruit/count")
+    public CountFruitByNameResponse selectCountFruitByName(@RequestParam String name) {
+        return new CountFruitByNameResponse(fruitService.selectCountFruitByName(name));
+    }
+
+    @GetMapping("/api/v1/fruit/list")
+    public List<FruitDefaultDto> selectFruitsByPriceOption(@RequestParam("option") FruitPriceOption option, @RequestParam long price) {
+        return fruitService.selectFruitsByPriceOption(option, price);
+    }
 }
