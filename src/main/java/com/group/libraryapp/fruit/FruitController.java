@@ -9,33 +9,26 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class FruitController {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final FruitService fruitService;
 
-    public FruitController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public FruitController(FruitService fruitService) {
+        this.fruitService = fruitService;
     }
 
     @PostMapping("/api/v1/fruit")
     public void saveFruitInfo(@RequestBody SaveFruitInfoRequest request) {
-        String sql = "INSERT INTO fruit(name, price, stocked_date) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, request.getName(), request.getPrice(), request.getWarehousingDate());
+        fruitService.saveFruitInfo(request);
     }
 
     @PutMapping("/api/v1/fruit")
     public void updateFruitStock(@RequestBody updateFruitStockRequest request) {
-        String readSql = "SELECT stock FROM fruit WHERE id = ?";
-        int stock = jdbcTemplate.queryForObject(readSql, Integer.class, request.getId());
-        if (stock < 1) {
-            throw new IllegalArgumentException();
-        }
-        String sql = "UPDATE fruit SET stock = stock - 1 where id = ?";
-        jdbcTemplate.update(sql, request.getId());
+        fruitService.updateFruitStock(request);
     }
 
     @GetMapping("/api/v1/fruit/stat")
     public SalesAmountInfoResponse selectSalesAmountInfo(@RequestParam String name) {
-        long salesAmount = jdbcTemplate.queryForObject("SELECT SUM(price) FROM fruit WHERE name = ? AND  stock = 0", Long.class, name);
-        long notSalesAmount = jdbcTemplate.queryForObject("SELECT SUM(price * stock) FROM fruit WHERE name = ? AND stock > 0", Long.class, name);
+        long salesAmount = fruitService.selectSalesAmount(name);
+        long notSalesAmount = fruitService.selectNotSalesAmount(name);
 
         return new SalesAmountInfoResponse(salesAmount, notSalesAmount);
     }
